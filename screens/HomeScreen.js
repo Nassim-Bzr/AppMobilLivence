@@ -14,8 +14,10 @@ import {
 } from 'react-native';
 import Card from '../components/Card';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function HomeScreen({ navigation }) {
+  const { isAuthenticated, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [apartments, setApartments] = useState([]);
   const [error, setError] = useState(null);
@@ -125,7 +127,9 @@ export default function HomeScreen({ navigation }) {
       >
         <View style={styles.bannerOverlay}>
           <Text style={styles.bannerTitle}>Bienvenue chez Livence</Text>
-          <Text style={styles.bannerSubtitle}>Vous n'êtes pas connecté.</Text>
+          <Text style={styles.bannerSubtitle}>
+            {isAuthenticated && user ? `Bonjour, ${user.nom}` : "Vous n'êtes pas connecté."}
+          </Text>
         </View>
       </ImageBackground>
 

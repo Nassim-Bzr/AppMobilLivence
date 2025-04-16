@@ -10,33 +10,48 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
   const checkAuthStatus = async () => {
     try {
       const isAuth = await authService.isAuthenticated();
+      const userData = await authService.getCurrentUser();
+      
       setIsAuthenticated(isAuth);
-      if (isAuth) {
-        const userData = await authService.getCurrentUser();
+      if (isAuth && userData) {
         setUser(userData);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch (error) {
       console.error('Erreur lors de la vérification du statut d\'authentification:', error);
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
   const login = async (credentials) => {
     try {
       const response = await authService.login(credentials);
-      setIsAuthenticated(true);
-      setUser(response.user);
-      return response;
+      
+      if (response && response.user && response.token) {
+        setIsAuthenticated(true);
+        setUser(response.user);
+        // Force une mise à jour du state
+        await checkAuthStatus();
+        return response;
+      } else {
+        throw new Error('Données de connexion invalides');
+      }
     } catch (error) {
       console.error('Erreur de connexion:', error);
+      setIsAuthenticated(false);
+      setUser(null);
       throw error;
     }
   };
@@ -48,6 +63,9 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     } catch (error) {
       console.error('Erreur de déconnexion:', error);
+      // On force quand même la déconnexion côté client
+      setIsAuthenticated(false);
+      setUser(null);
       throw error;
     }
   };
@@ -55,11 +73,17 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authService.register(userData);
-      setIsAuthenticated(true);
-      setUser(response.user);
-      return response;
+      if (response && response.user) {
+        setIsAuthenticated(true);
+        setUser(response.user);
+        return response;
+      } else {
+        throw new Error('Données d\'inscription invalides');
+      }
     } catch (error) {
       console.error('Erreur d\'inscription:', error);
+      setIsAuthenticated(false);
+      setUser(null);
       throw error;
     }
   };

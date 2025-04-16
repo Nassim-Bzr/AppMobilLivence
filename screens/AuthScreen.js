@@ -59,34 +59,28 @@ export default function AuthScreen({ navigation }) {
       if (isLogin) {
         // Tentative de connexion
         const result = await login({ email, password });
-        if (result.success) {
-          Alert.alert('Connexion réussie', `Bienvenue ${result.user?.nom || ''}`);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          });
-        } else {
-          Alert.alert('Erreur', result.error || 'Échec de la connexion');
-        }
+        // La connexion est réussie si on arrive ici (pas d'erreur lancée)
+        // Navigation vers la page d'accueil
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        });
       } else {
         // Tentative d'inscription
         const result = await register({ nom, email, password });
-        if (result.success) {
-          Alert.alert(
-            'Inscription réussie',
-            'Votre compte a été créé avec succès.',
-            [{ text: 'OK', onPress: () => setIsLogin(true) }]
-          );
-          setNom('');
-          setEmail('');
-          setPassword('');
-        } else {
-          Alert.alert('Erreur', result.error || 'Échec de l\'inscription');
-        }
+        // L'inscription est réussie si on arrive ici (pas d'erreur lancée)
+        Alert.alert(
+          'Inscription réussie',
+          'Votre compte a été créé avec succès.',
+          [{ text: 'OK', onPress: () => setIsLogin(true) }]
+        );
+        setNom('');
+        setEmail('');
+        setPassword('');
       }
     } catch (error) {
       console.error('Erreur d\'authentification:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'authentification');
+      Alert.alert('Erreur', error.message || 'Une erreur est survenue lors de l\'authentification');
     } finally {
       setLoading(false);
     }

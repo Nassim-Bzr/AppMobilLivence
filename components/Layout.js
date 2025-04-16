@@ -14,11 +14,11 @@ function LayoutContent({ children }) {
       {/* Container principal */}
       <View style={styles.container}>
         {/* Contenu principal */}
-        <View style={styles.content}>{children}</View>
-        {/* Navbar en bas */}
-        <View style={styles.footer}>
-          <Navbar />
+        <View style={[styles.content, { paddingBottom: 75 }]}>
+          {children}
         </View>
+        {/* La Navbar est maintenant en position absolue, donc pas besoin de View container */}
+        <Navbar />
       </View>
     </View>
   );
@@ -39,20 +39,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    position: 'relative',
   },
   content: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingBottom: 0,
-  },
-  footer: {
-    backgroundColor: '#fff',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    margin: 0,
-    padding: 0,
   },
 });

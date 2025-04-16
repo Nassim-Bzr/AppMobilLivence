@@ -34,7 +34,8 @@ export const authService = {
         throw new Error(`Réponse du serveur invalide: ${responseText}`);
       }
       
-      if (!response.ok) {
+      // Si la réponse contient un message d'erreur mais pas de token
+      if (data.error || (!data.token && !data.user)) {
         throw new Error(data.message || 'Erreur lors de l\'inscription');
       }
       
@@ -72,7 +73,8 @@ export const authService = {
         throw new Error(`Réponse du serveur invalide: ${responseText}`);
       }
       
-      if (!response.ok) {
+      // Si la réponse contient un message d'erreur mais pas de token
+      if (data.error || (!data.token && !data.user)) {
         throw new Error(data.message || 'Erreur lors de la connexion');
       }
       
@@ -87,6 +89,7 @@ export const authService = {
       };
       
       await AsyncStorage.setItem('authData', JSON.stringify(authData));
+      console.log('Données d\'authentification sauvegardées:', authData);
       
       return data;
     } catch (error) {
@@ -99,29 +102,27 @@ export const authService = {
   logout: async () => {
     try {
       // Appel à l'API pour déconnecter l'utilisateur côté serveur
-      const token = await AsyncStorage.getItem('userToken');
-      
-      if (token) {
+      const authDataStr = await AsyncStorage.getItem('authData');
+      if (authDataStr) {
+        const authData = JSON.parse(authDataStr);
         await fetch(`${API_BASE}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            'Authorization': `Bearer ${authData.token}`,
           },
         });
       }
       
       // Supprimer les données locales
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userData');
+      await AsyncStorage.removeItem('authData');
       
       return true;
     } catch (error) {
       console.error('Erreur de déconnexion:', error);
       
       // Même en cas d'erreur, on supprime les données locales
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userData');
+      await AsyncStorage.removeItem('authData');
       
       return false;
     }
